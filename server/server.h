@@ -16,3 +16,4 @@
  * along with TAXOB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+int createConnection(int port);

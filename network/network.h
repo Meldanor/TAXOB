@@ -16,25 +16,8 @@
  * along with TAXOB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#define SOCKET_FAMILY AF_INET
+#define SOCKET_TYPE SOCK_STREAM
+#define SOCKET_PROTOCOL 0
 
-#include "../network/network.h"
-
-int main(int argc, char **args) {
-    printf("Starting TAXOB Server...\n");
-    
-    if (createConnection() == EXIT_FAILURE) {
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
-
-int createConnection(int port) {
-
-    int socketID = createSocket();
-    if (socketID < 0) {
-        perror("Unable to create socket!\n");
-        return EXIT_FAILURE;
-    }
-}
+int createSocket(void);
