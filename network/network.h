@@ -20,4 +20,6 @@
 #define SOCKET_TYPE SOCK_STREAM
 #define SOCKET_PROTOCOL 0
 
+#define TAXOB_PORT 1337
+
 int createSocket(void);
