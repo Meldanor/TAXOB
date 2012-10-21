@@ -76,7 +76,7 @@ void clientLoop(void) {
             break;
         }
         if (receiveMessage(inBuffer) == EXIT_SUCCESS) {
-            clientIsRunning;
+            clientIsRunning = false;
             break;
         }
         printf("Received\t'%s1024'\n", inBuffer);
@@ -86,8 +86,10 @@ void clientLoop(void) {
 
 int sendMessage(char *msg) {
     int bytes = send(clientSocket, msg, strlen(msg), 0);
-    if (bytes == -1)
+    if (bytes == -1) {
+        perror("Error while sending data!\n");
         return EXIT_FAILURE;
+    }
     else
         return EXIT_SUCCESS;
 }
