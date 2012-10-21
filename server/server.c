@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -97,9 +98,40 @@ void serverLoop(void) {
 }
 
 void handleClient(int clientSocket, struct sockaddr_in *client) {
+
     // TODO: Create a thread to handle the connected client
+    char outBuffer[512];
+    char inBuffer[1024];
+    while(true) {
+        if (receiveMessage(clientSocket, inBuffer) == EXIT_FAILURE)
+            break;
+        printf("Received\t'%s'\n", inBuffer);
+        if (sendMessage(clientSocket, outBuffer) == EXIT_FAILURE)
+            break;
+        printf("Send\t'%s'\n", outBuffer);
+    }
+    
 }
 
+int sendMessage(int socket, char *msg) {
+    int bytes = send(socket, msg, strlen(msg), 0);
+    if (bytes == -1) {
+        perror("Error while sending data!\n");
+        return EXIT_FAILURE;
+    }
+    else
+        return EXIT_SUCCESS;
+}
+
+int receiveMessage(int socket, char *buffer) {
+    int bytes = recv(socket, buffer, sizeof(buffer) - 1, 0);
+    if (bytes == -1) {
+        perror("Error while receiving data!\n");
+        return EXIT_FAILURE;
+    }
+    else
+        return EXIT_SUCCESS;
+}
 void stopServer(void) {
     // FUNCTION TO CLEAN UP
     close(serverSocket);
