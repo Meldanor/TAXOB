@@ -71,11 +71,11 @@ void clientLoop(void) {
     while (clientIsRunning) {
         scanf("%512s", outBuffer);
         printf("Send\t'%s512'\n", outBuffer);
-        if (sendMessage(outBuffer) == EXIT_SUCCESS) {
+        if (sendMessage(outBuffer) == EXIT_FAILURE) {
             clientIsRunning = false;
             break;
         }
-        if (receiveMessage(inBuffer) == EXIT_SUCCESS) {
+        if (receiveMessage(inBuffer) == EXIT_FAILURE) {
             clientIsRunning = false;
             break;
         }
