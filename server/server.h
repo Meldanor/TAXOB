@@ -16,4 +16,12 @@
  * along with TAXOB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define SERVER_QUEUE_SIZE 8
+
 int createConnection(int port);
+
+void serverLoop(void);
+
+void stopServer(void);
+
+void handleClient(int clientSocket, struct sockaddr_in *client);
