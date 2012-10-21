@@ -23,3 +23,5 @@
 #define TAXOB_PORT 1337
 
 int createSocket(void);
+
+int getAddress(char *address, struct sockaddr_in *sockAddr);

@@ -16,3 +16,10 @@
  * along with TAXOB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+int createConnection(char *address, int port);
+
+void clientLoop(void);
+
+int sendMessage(char *msg);
+
+int receiveMessage(char *buffer);
