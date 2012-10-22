@@ -22,6 +22,6 @@ int createConnection(int port);
 
 void serverLoop(void);
 
-void stopServer(void);
+void stopServer(int signal);
 
 void handleClient(int clientSocket, struct sockaddr_in *client);

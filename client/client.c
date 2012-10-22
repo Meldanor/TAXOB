@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
+#include <signal.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -34,6 +35,9 @@ bool clientIsRunning = true;
 
 int main(int argc, char **args) {
     printf("Starting TAXOB Client...\n");
+    
+    // REGISTERING THE STOP SIGNAL
+    signal(SIGINT, stopClient);
 
     /* READ ARGUMENTS*/
     if (argc < 5) {
@@ -105,7 +109,7 @@ void clientLoop(void) {
     memset(inBuffer, 0, 1024);
     while (clientIsRunning) {
         fgets(outBuffer, 512, stdin);
-        printf("Send     '%s'\n", outBuffer);
+        printf("Send     %s", outBuffer);
         if (sendMessage(outBuffer) == EXIT_FAILURE) {
             clientIsRunning = false;
             break;
@@ -114,8 +118,10 @@ void clientLoop(void) {
             clientIsRunning = false;
             break;
         }
-        printf("Received '%s'\n", inBuffer);
+        printf("Received %s", inBuffer);
     }
+    
+    stopClient(EXIT_SUCCESS);
 }
 
 int sendMessage(char *msg) {
@@ -138,4 +144,12 @@ int receiveMessage(char *buffer) {
     else {
         return EXIT_SUCCESS;
     }
+}
+
+void stopClient(int signal) {
+    printf("Shutting down the client...\n");
+    printf("Close client socket...\n");
+    close(clientSocket);
+    
+    exit(signal);
 }

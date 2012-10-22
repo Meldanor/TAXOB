@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
+#include <signal.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -32,8 +33,15 @@
 int serverSocket;
 bool serverIsRunning = true;
 
+int clientSockets[64];
+int connectedClients;
+
 int main(int argc, char **args) {
+
     printf("Starting TAXOB Server...\n");
+
+    // REGISTERING THE STOP SIGNAL
+    signal(SIGINT, stopServer);
 
     /* READ ARGUMENTS*/
     if (argc < 3) {
@@ -130,11 +138,13 @@ void serverLoop(void) {
         handleClient(clientSocket, &client);
     }
 
-    stopServer();
+    stopServer(EXIT_SUCCESS);
 }
 
 void handleClient(int clientSocket, struct sockaddr_in *client) {
 
+    // TODO: ONLY ACCEPT A MAXIMUM
+    clientSockets[connectedClients++] = clientSocket;
     // TODO: Create a thread to handle the connected client
     char outBuffer[512];
     char inBuffer[1024];
@@ -143,11 +153,11 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     while(true) {
         if (receiveMessage(clientSocket, inBuffer) == EXIT_FAILURE)
             break;
-        printf("Received '%s'\n", inBuffer);
+        printf("Received %s", inBuffer);
         memcpy(outBuffer, inBuffer, 512);
         if (sendMessage(clientSocket, outBuffer) == EXIT_FAILURE)
             break;
-        printf("Send     '%s'\n", outBuffer);
+        printf("Send     %s", outBuffer);
     }
     
 }
@@ -173,7 +183,17 @@ int receiveMessage(int socket, char *buffer) {
         return EXIT_SUCCESS;
     }
 }
-void stopServer(void) {
+
+void stopServer(int signal) {
+    printf("Shutting down the server...\n");
     // FUNCTION TO CLEAN UP
+    printf("Close %d client sockets...\n", connectedClients);
+    int i;
+    for (i = 0 ; i < connectedClients; ++i) {
+        close(clientSockets[i]);
+    } 
+    printf("Close server socket...\n");
     close(serverSocket);
+    
+    exit(signal);
 }
