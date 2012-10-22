@@ -102,13 +102,16 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     // TODO: Create a thread to handle the connected client
     char outBuffer[512];
     char inBuffer[1024];
+    memset(outBuffer, 0, 512);
+    memset(inBuffer, 0, 1024);
     while(true) {
         if (receiveMessage(clientSocket, inBuffer) == EXIT_FAILURE)
             break;
-        printf("Received\t'%s'\n", inBuffer);
+        printf("Received '%s'\n", inBuffer);
+        memcpy(outBuffer, inBuffer, 512);
         if (sendMessage(clientSocket, outBuffer) == EXIT_FAILURE)
             break;
-        printf("Send\t'%s'\n", outBuffer);
+        printf("Send     '%s'\n", outBuffer);
     }
     
 }
@@ -119,18 +122,20 @@ int sendMessage(int socket, char *msg) {
         perror("Error while sending data!\n");
         return EXIT_FAILURE;
     }
-    else
+    else {
         return EXIT_SUCCESS;
+    }
 }
 
 int receiveMessage(int socket, char *buffer) {
-    int bytes = recv(socket, buffer, sizeof(buffer) - 1, 0);
+    int bytes = recv(socket, buffer, 1024, 0);
     if (bytes == -1) {
         perror("Error while receiving data!\n");
         return EXIT_FAILURE;
     }
-    else
+    else {
         return EXIT_SUCCESS;
+    }
 }
 void stopServer(void) {
     // FUNCTION TO CLEAN UP

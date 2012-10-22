@@ -67,10 +67,11 @@ void clientLoop(void) {
 
     char outBuffer[512];
     char inBuffer[1024];
-
+    memset(outBuffer, 0, 512);
+    memset(inBuffer, 0, 1024);
     while (clientIsRunning) {
-        scanf("%512s", outBuffer);
-        printf("Send\t'%s512'\n", outBuffer);
+        fgets(outBuffer, 512, stdin);
+        printf("Send     '%s'\n", outBuffer);
         if (sendMessage(outBuffer) == EXIT_FAILURE) {
             clientIsRunning = false;
             break;
@@ -79,9 +80,8 @@ void clientLoop(void) {
             clientIsRunning = false;
             break;
         }
-        printf("Received\t'%s1024'\n", inBuffer);
+        printf("Received '%s'\n", inBuffer);
     }
-    
 }
 
 int sendMessage(char *msg) {
@@ -90,16 +90,18 @@ int sendMessage(char *msg) {
         perror("Error while sending data!\n");
         return EXIT_FAILURE;
     }
-    else
+    else {
         return EXIT_SUCCESS;
+    }
 }
 
 int receiveMessage(char *buffer) {
-    int bytes = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    int bytes = recv(clientSocket, buffer, 1024 , 0);
     if (bytes == -1) {
         perror("Error while receiving data!\n");
         return EXIT_FAILURE;
     }
-    else
+    else {
         return EXIT_SUCCESS;
+    }
 }
