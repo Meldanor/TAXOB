@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <limits.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -28,19 +29,52 @@
 #include "../network/network.h"
 #include "client.h"
 
-#define TEST_ADDRESS "127.0.0.1"
-
 int clientSocket;
 bool clientIsRunning = true;
 
 int main(int argc, char **args) {
     printf("Starting TAXOB Client...\n");
-    if (createConnection(TEST_ADDRESS, TAXOB_PORT) == EXIT_FAILURE) {        
+
+    /* READ ARGUMENTS*/
+    if (argc < 5) {
+        printf("%s -p Port -h Host\n", args[0]);
         return EXIT_FAILURE;
     }
+    int i;
+    char *cur;
+
+    char *address;
+    long int port;
+    for (i = 1 ; i < argc ; ++i) {
+        cur = args[i];
+        // READ PORT
+        if (strcmp(cur, "-p") == 0) {
+            port = strtol(args[++i], (char **) NULL, 10);
+            if (port == LONG_MIN || port == LONG_MAX) {
+                printf("Port %s is an invalid number!\n", args[i]);
+                return EXIT_FAILURE;
+            }
+        }
+        // READ HOST
+        else if (strcmp(cur, "-h") == 0) {
+            address = args[++i];
+        }
+        // UNKNOWN OPTION
+        else {
+            printf("Unknown option %s\n", cur);
+            return EXIT_FAILURE;
+        }
+    }
+    printf("Connect to %s on Port %ld...\n", address, port);
+
+    if (createConnection(address, port) == EXIT_FAILURE) {        
+        return EXIT_FAILURE;
+    }
+
     printf("TAXOB Client started!\n");
     clientLoop();
-    return EXIT_FAILURE;
+
+    return EXIT_SUCCESS;
 }
 
 int createConnection(char *address, int port) {

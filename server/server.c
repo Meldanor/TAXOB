@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <limits.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -33,16 +34,51 @@ bool serverIsRunning = true;
 
 int main(int argc, char **args) {
     printf("Starting TAXOB Server...\n");
-    
+
+    /* READ ARGUMENTS*/
+    if (argc < 3) {
+        printf("%s -p Port\n", args[0]);
+        return EXIT_FAILURE;
+    }
+    int i;
+    char *cur;
+    long int port;
+    for (i = 1 ; i < argc ; ++i) {
+        cur = args[i];
+        // READ PORT 
+        if (strcmp(cur, "-p") == 0) {
+            // CONVERT THE STRING TO AN INTEGER
+            // TODO: Use a method that checqks if it is an valid number
+            port = strtol(args[++i], (char **) NULL, 10);
+            if (port == LONG_MIN || port == LONG_MAX) {
+                printf("Port %s is an invalid number!\n", args[i]);
+                return EXIT_FAILURE;
+            }
+            // DISALLOW KERNEL PORTS
+            if (port <= 1024) {
+                printf("Port %ld must be higher than 1024!\n", port);
+                return EXIT_FAILURE;
+            }
+        }
+        // UNKNOWN OPTION
+        else {
+            printf("Unknown option %s\n", cur);
+            return EXIT_FAILURE;
+        }
+    }
+
+    printf("Trying to listen to the port %ld...\n", port);
     // CREATE A SOCKET THE SERVER WILL LISTEN TO
-    if (createConnection(TAXOB_PORT) == EXIT_FAILURE) {
+    if (createConnection(port) == EXIT_FAILURE) {
         // SOMETHING FAILED
         return EXIT_FAILURE;
     }
 
     printf("TAXOB Server started!\n");
+
     // HANDLE ALL INCOMING CLIENTS
     serverLoop();
+
     return EXIT_SUCCESS;
 }
 
