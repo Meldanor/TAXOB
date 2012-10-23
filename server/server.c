@@ -33,6 +33,7 @@
 int serverSocket;
 bool serverIsRunning = true;
 
+// CURRENT CONNECTED CLIENTS
 int clientSockets[64];
 int connectedClients;
 
@@ -146,15 +147,21 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     // TODO: ONLY ACCEPT A MAXIMUM
     clientSockets[connectedClients++] = clientSocket;
     // TODO: Create a thread to handle the connected client
+    // BUFFER
     char outBuffer[512];
     char inBuffer[1024];
+    // CLEAR BUFFER (WE DONT WANT TO SEND TRASH)
     memset(outBuffer, 0, 512);
     memset(inBuffer, 0, 1024);
+
     while(true) {
+        // WAIT FOR DATA - BLOCKS THREAD
         if (receiveMessage(clientSocket, inBuffer) == EXIT_FAILURE)
             break;
         printf("Received %s", inBuffer);
+        // COPY THE RECEIVED DATA TO SEND DATA BUFFER
         memcpy(outBuffer, inBuffer, 512);
+        // SEND THE RECEIVED DATA BACK TO CLIENT
         if (sendMessage(clientSocket, outBuffer) == EXIT_FAILURE)
             break;
         printf("Send     %s", outBuffer);
@@ -188,11 +195,13 @@ void stopServer(int signal) {
     printf("Shutting down the server...\n");
     // FUNCTION TO CLEAN UP
     printf("Close %d client sockets...\n", connectedClients);
+    // CLOSE CLIENT SOCKETS 
     int i;
     for (i = 0 ; i < connectedClients; ++i) {
         close(clientSockets[i]);
     } 
     printf("Close server socket...\n");
+    // CLOSE SERVER SOCKET    
     close(serverSocket);
     
     exit(signal);
