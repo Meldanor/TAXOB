@@ -160,7 +160,7 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     int bytes_read;
     int bytes_send;
     
-    bytes_read = recv(clientSocket, inBuffer, IN_BUFFER_SIZE - 1, 0);
+    bytes_read = read(clientSocket, inBuffer, IN_BUFFER_SIZE - 1, 0);
     
     if (bytes_read == -1) {
         perror("Something went wrong while receiving...\n");
@@ -168,7 +168,7 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     else {    
         printf("Received %d Bytes. %s", bytes_read, inBuffer);
         memcpy(outBuffer, inBuffer, bytes_read);
-        bytes_send = send(clientSocket, outBuffer, bytes_read, 0);
+        bytes_send = write(clientSocket, outBuffer, bytes_read, 0);
         if (bytes_send == -1 ) {
             perror("Something went wrong while sending...\n");
         }

@@ -130,15 +130,15 @@ void clientLoop(void) {
 
     // WAIT FOR CONSOLE INPUT
     fgets(outBuffer, OUT_BUFFER_SIZE, stdin);
-
-    bytes_send = send(clientSocket, outBuffer, OUT_BUFFER_SIZE - 1, 0);
+    
+    bytes_send = write(clientSocket, outBuffer, OUT_BUFFER_SIZE - 1);
     if (bytes_read == -1 ) {
         perror("Something went wrong while receiving...\n");
     }
     else {
         printf("Send %d Bytes. %s", bytes_send, outBuffer);
         memcpy(inBuffer, outBuffer, bytes_send);
-        bytes_read = recv(clientSocket, inBuffer, bytes_send, 0);
+        bytes_read = read(clientSocket, inBuffer, bytes_send);
         if (bytes_read == -1) {
             perror("Something went wrong while receiving...\n");
         }
