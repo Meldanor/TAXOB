@@ -142,53 +142,43 @@ void serverLoop(void) {
     stopServer(EXIT_SUCCESS);
 }
 
+#define OUT_BUFFER_SIZE 4096
+#define IN_BUFFER_SIZE 4096
+
 void handleClient(int clientSocket, struct sockaddr_in *client) {
 
     // TODO: ONLY ACCEPT A MAXIMUM
     clientSockets[connectedClients++] = clientSocket;
     // TODO: Create a thread to handle the connected client
     // BUFFER
-    char outBuffer[512];
-    char inBuffer[1024];
+    char outBuffer[OUT_BUFFER_SIZE];
+    char inBuffer[IN_BUFFER_SIZE];
     // CLEAR BUFFER (WE DONT WANT TO SEND TRASH)
-    memset(outBuffer, 0, 512);
-    memset(inBuffer, 0, 1024);
+    memset(outBuffer, 0, OUT_BUFFER_SIZE);
+    memset(inBuffer, 0, IN_BUFFER_SIZE);
 
-    while(true) {
-        // WAIT FOR DATA - BLOCKS THREAD
-        if (receiveMessage(clientSocket, inBuffer) == EXIT_FAILURE)
-            break;
-        printf("Received %s", inBuffer);
-        // COPY THE RECEIVED DATA TO SEND DATA BUFFER
-        memcpy(outBuffer, inBuffer, 512);
-        // SEND THE RECEIVED DATA BACK TO CLIENT
-        if (sendMessage(clientSocket, outBuffer) == EXIT_FAILURE)
-            break;
-        printf("Send     %s", outBuffer);
-    }
+    int bytes_read;
+    int bytes_send;
     
-}
+    bytes_read = recv(clientSocket, inBuffer, IN_BUFFER_SIZE - 1, 0);
+    
+    if (bytes_read == -1) {
+        perror("Something went wrong while receiving...\n");
+    }  
+    else {    
+        printf("Received %d Bytes. %s", bytes_read, inBuffer);
+        memcpy(outBuffer, inBuffer, bytes_read);
+        bytes_send = send(clientSocket, outBuffer, bytes_read, 0);
+        if (bytes_send == -1 ) {
+            perror("Something went wrong while sending...\n");
+        }
+        else
+            printf("Send %d Bytes.    %s", bytes_send, outBuffer);
 
-int sendMessage(int socket, char *msg) {
-    int bytes = send(socket, msg, strlen(msg), 0);
-    if (bytes == -1) {
-        perror("Error while sending data!\n");
-        return EXIT_FAILURE;
     }
-    else {
-        return EXIT_SUCCESS;
-    }
-}
-
-int receiveMessage(int socket, char *buffer) {
-    int bytes = recv(socket, buffer, 1024, 0);
-    if (bytes == -1) {
-        perror("Error while receiving data!\n");
-        return EXIT_FAILURE;
-    }
-    else {
-        return EXIT_SUCCESS;
-    }
+    // CLOSE CONNECTION
+    close(clientSocket);
+    clientSockets[--connectedClients] = 0;
 }
 
 void stopServer(int signal) {
