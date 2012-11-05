@@ -8,7 +8,7 @@ SERVER_VERSION = 1.0
 SERVER_DIR = server/
 SERVER_FILES = *.c
 
-COMMON_FILES = network/*.c
+COMMON_FILES = network/*.c common/*.c
 
 OUT_DIR = ./bin
 
