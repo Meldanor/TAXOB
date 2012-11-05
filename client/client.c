@@ -129,21 +129,31 @@ void clientLoop(void) {
     int bytes_send;
 
     // WAIT FOR CONSOLE INPUT
-    fgets(outBuffer, OUT_BUFFER_SIZE, stdin);
-    
-    bytes_send = write(clientSocket, outBuffer, OUT_BUFFER_SIZE - 1);
-    if (bytes_read == -1 ) {
-        perror("Something went wrong while receiving...\n");
-    }
-    else {
-        printf("Send %d Bytes. %s", bytes_send, outBuffer);
-        memcpy(inBuffer, outBuffer, bytes_send);
-        bytes_read = read(clientSocket, inBuffer, bytes_send);
-        if (bytes_read == -1) {
+    while(fgets(outBuffer, sizeof(outBuffer), stdin))  {
+        int len = strnlen(outBuffer, sizeof(outBuffer));
+        if(outBuffer[len-1] == '\n')
+            outBuffer[len-1] = '\0';
+        bytes_send = write(clientSocket, outBuffer, len -1);
+        if (bytes_send == -1 ) {
             perror("Something went wrong while receiving...\n");
         }
         else {
-            printf("Received %d Bytes. %s", bytes_read, outBuffer);
+            printf("Sent %d Bytes: ", bytes_send);
+            puts(outBuffer);            
+            //write(stdout, outBuffer, bytes_send);
+            //fflush(stdout);
+            memcpy(inBuffer, outBuffer, bytes_send);
+            bytes_read = read(clientSocket, inBuffer, bytes_send);
+            if (bytes_read == -1) {
+                perror("Something went wrong while receiving...\n");
+            }
+            else {
+                printf("Received %d Bytes: ", bytes_read);
+                puts(inBuffer);
+                //write(stdout, inBuffer, bytes_read);
+                //fflush(stdout);
+                //puts("");
+            }
         }
     }
     stopClient(EXIT_SUCCESS);
@@ -155,7 +165,7 @@ void stopClient(int signal) {
     printf("Close client socket...\n");
     // CLOSE THE SOCKET
     close(clientSocket);
-    
+
     // TERMINATE THE PROGRAM   
     exit(signal);
 }

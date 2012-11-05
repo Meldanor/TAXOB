@@ -54,7 +54,7 @@ int main(int argc, char **args) {
     long int port;
     for (i = 1 ; i < argc ; ++i) {
         cur = args[i];
-        // READ PORT 
+        // READ PORT
         if (strcmp(cur, "-p") == 0) {
             // CONVERT THE STRING TO AN INTEGER
             // TODO: Use a method that checqks if it is an valid number
@@ -135,6 +135,7 @@ void serverLoop(void) {
             perror("Can't accept a new client!\n");
             continue;
         }
+        puts("Client connected!");
         // HANDLE THE CLIENT
         handleClient(clientSocket, &client);
     }
@@ -160,22 +161,31 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     int bytes_read;
     int bytes_send;
     
-    bytes_read = read(clientSocket, inBuffer, IN_BUFFER_SIZE - 1, 0);
+    while((bytes_read = read(clientSocket, inBuffer, sizeof(inBuffer)))) {
     
-    if (bytes_read == -1) {
-        perror("Something went wrong while receiving...\n");
-    }  
-    else {    
-        printf("Received %d Bytes. %s", bytes_read, inBuffer);
-        memcpy(outBuffer, inBuffer, bytes_read);
-        bytes_send = write(clientSocket, outBuffer, bytes_read, 0);
-        if (bytes_send == -1 ) {
-            perror("Something went wrong while sending...\n");
+        if (bytes_read == -1) {
+            perror("Something went wrong while receiving...\n");
+        }  
+        else {
+            printf("Received %d Bytes: ", bytes_read);
+            puts(inBuffer);            
+            //write(stdout, inBuffer, bytes_read);
+            //fflush(stdout);
+            memcpy(outBuffer, inBuffer, bytes_read);
+            bytes_send = write(clientSocket, outBuffer, bytes_read);
+            if (bytes_send == -1 ) {
+                perror("Something went wrong while sending...\n");
+            }
+            else {
+                printf("Sent %d Bytes: ", bytes_read);
+                puts(outBuffer);                
+                //write(stdout, outBuffer, bytes_send);
+                //fflush(stdout);
+                //puts("");
+            }
         }
-        else
-            printf("Send %d Bytes.    %s", bytes_send, outBuffer);
-
     }
+    puts("Disconnect client...");
     // CLOSE CONNECTION
     close(clientSocket);
     clientSockets[--connectedClients] = 0;
