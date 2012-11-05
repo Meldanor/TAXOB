@@ -184,6 +184,8 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
                 //puts("");
             }
         }
+        memset(outBuffer, 0, OUT_BUFFER_SIZE);
+        memset(inBuffer, 0, IN_BUFFER_SIZE);
     }
     puts("Disconnect client...");
     // CLOSE CONNECTION

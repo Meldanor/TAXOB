@@ -155,6 +155,8 @@ void clientLoop(void) {
                 //puts("");
             }
         }
+        memset(outBuffer, 0, OUT_BUFFER_SIZE);
+        memset(inBuffer, 0, IN_BUFFER_SIZE);
     }
     stopClient(EXIT_SUCCESS);
 }
