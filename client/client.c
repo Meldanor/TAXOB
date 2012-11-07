@@ -35,6 +35,7 @@ int clientSocket;
 bool clientIsRunning = true;
 
 int main(int argc, char **args) {
+
     printf("Starting TAXOB Client...\n");
     
     // REGISTERING THE STOP SIGNAL(CTRL+C)
@@ -118,47 +119,47 @@ int createConnection(char *address, int port) {
 
 void clientLoop(void) {
 
+    // Write everything immidately to the console
+    setbuf(stdout, NULL);
+
     // BUFFER FOR OUTCOMING DATA
-    char outBuffer[OUT_BUFFER_SIZE];
+    char outBuffer[OUT_BUFFER_SIZE] = {0};
     // BUFFER FOR INCOMING DATA
-    char inBuffer[IN_BUFFER_SIZE];
-    // RESET THE BUFFER(WE DON'T WANT TO SEND TRASH!)
-    memset(outBuffer, 0, OUT_BUFFER_SIZE);
-    memset(inBuffer, 0, IN_BUFFER_SIZE);
+    char inBuffer[IN_BUFFER_SIZE] = {0};
 
     int bytes_read;
     int bytes_send;
 
-    // WAIT FOR CONSOLE INPUT
-
     int inputLen = 0;
+    // Read from console
     while ((inputLen = read(STDIN_FILENO, outBuffer, sizeof(outBuffer)))) {
-        if (inputLen > 0 && outBuffer[inputLen - 1] == '\n')
-            outBuffer[inputLen-1] = '\0';
 
-        bytes_send = write(clientSocket, outBuffer, inputLen -1);
+        // Send message to server
+        bytes_send = write(clientSocket, outBuffer, inputLen - 1);
         if (bytes_send == -1 ) {
             perror("Something went wrong while receiving...\n");
+            break;
         }
         else {
+            // Write information about sending process
             printf("Sent %d Bytes: ", bytes_send);
-            fflush(stdout);
             write(STDOUT_FILENO , outBuffer, bytes_send);
-            puts("");
+
+            // Read the answer of the server
             bytes_read = read(clientSocket, inBuffer, bytes_send);
             if (bytes_read == -1) {
                 perror("Something went wrong while receiving...\n");
+                break;
             }
             else {
+                // Write information about receiving process
                 printf("Received %d Bytes: ", bytes_read);
-                fflush(stdout);
                 write(STDOUT_FILENO , inBuffer, bytes_read);
-                puts("");
             }
         }
-        memset(outBuffer, 0, OUT_BUFFER_SIZE);
-        memset(inBuffer, 0, IN_BUFFER_SIZE);
     }
+    
+    // Close client when user has no more data to send
     stopClient(EXIT_SUCCESS);
 }
 

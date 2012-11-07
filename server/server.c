@@ -149,45 +149,44 @@ void serverLoop(void) {
 
 void handleClient(int clientSocket, struct sockaddr_in *client) {
 
-    // TODO: ONLY ACCEPT A MAXIMUM
+    // Write everything immidately to the console
+    setbuf(stdout, NULL);
+
     clientSockets[connectedClients++] = clientSocket;
-    // TODO: Create a thread to handle the connected client
     // BUFFER
-    char outBuffer[OUT_BUFFER_SIZE];
-    char inBuffer[IN_BUFFER_SIZE];
-    // CLEAR BUFFER (WE DONT WANT TO SEND TRASH)
-    memset(outBuffer, 0, OUT_BUFFER_SIZE);
-    memset(inBuffer, 0, IN_BUFFER_SIZE);
+    char outBuffer[OUT_BUFFER_SIZE] = {0};
+    char inBuffer[IN_BUFFER_SIZE] = {0};
 
     int bytes_read;
     int bytes_send;
-    
+
+    // Wait for information from the client
     while((bytes_read = read(clientSocket, inBuffer, sizeof(inBuffer)))) {
-    
+
         if (bytes_read == -1) {
             perror("Something went wrong while receiving...\n");
             break;
         }  
         else {
+            // Write information about the receiving process
             printf("Received %d Bytes: ", bytes_read);
-            fflush(stdout);
             write(STDOUT_FILENO, inBuffer, bytes_read);
-            puts("");
+
+            // Copy incoming data to out going buffer
             memcpy(outBuffer, inBuffer, bytes_read);
+
+            // Send data back to client
             bytes_send = write(clientSocket, outBuffer, bytes_read);
             if (bytes_send == -1 ) {
                 perror("Something went wrong while sending...\n");
+                break;
             }
             else {
+                // Write information about the sending process
                 printf("Sent %d Bytes: ", bytes_read);
-                fflush(stdout);
-                //puts(outBuffer);                
                 write(STDOUT_FILENO , outBuffer, bytes_send);
-                puts("");
             }
         }
-        memset(outBuffer, 0, OUT_BUFFER_SIZE);
-        memset(inBuffer, 0, IN_BUFFER_SIZE);
     }
     puts("Disconnect client...");
     // CLOSE CONNECTION
