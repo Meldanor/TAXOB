@@ -22,6 +22,7 @@
 #include <string.h>
 #include <limits.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -169,9 +170,9 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
         }  
         else {
             printf("Received %d Bytes: ", bytes_read);
-            puts(inBuffer);            
-            //write(stdout, inBuffer, bytes_read);
-            //fflush(stdout);
+            fflush(stdout);
+            write(STDOUT_FILENO, inBuffer, bytes_read);
+            puts("");
             memcpy(outBuffer, inBuffer, bytes_read);
             bytes_send = write(clientSocket, outBuffer, bytes_read);
             if (bytes_send == -1 ) {
@@ -179,10 +180,10 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
             }
             else {
                 printf("Sent %d Bytes: ", bytes_read);
-                puts(outBuffer);                
-                //write(stdout, outBuffer, bytes_send);
-                //fflush(stdout);
-                //puts("");
+                fflush(stdout);
+                //puts(outBuffer);                
+                write(STDOUT_FILENO , outBuffer, bytes_send);
+                puts("");
             }
         }
         memset(outBuffer, 0, OUT_BUFFER_SIZE);

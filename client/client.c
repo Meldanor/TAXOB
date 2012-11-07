@@ -22,6 +22,7 @@
 #include <string.h>
 #include <limits.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -131,29 +132,28 @@ void clientLoop(void) {
     // WAIT FOR CONSOLE INPUT
 
     int inputLen = 0;
-    while ((inputLen = read(stdin, outBuffer, sizeof(outBuffer))) {
+    while ((inputLen = read(STDIN_FILENO, outBuffer, sizeof(outBuffer)))) {
         if (inputLen > 0 && outBuffer[inputLen - 1] == '\n')
-            outBuffer[len-1] = '\0';
+            outBuffer[inputLen-1] = '\0';
 
-        bytes_send = write(clientSocket, outBuffer, len -1);
+        bytes_send = write(clientSocket, outBuffer, inputLen -1);
         if (bytes_send == -1 ) {
             perror("Something went wrong while receiving...\n");
         }
         else {
             printf("Sent %d Bytes: ", bytes_send);
-            puts(outBuffer);            
-            //write(stdout, outBuffer, bytes_send);
-            //fflush(stdout);
+            fflush(stdout);
+            write(STDOUT_FILENO , outBuffer, bytes_send);
+            puts("");
             bytes_read = read(clientSocket, inBuffer, bytes_send);
             if (bytes_read == -1) {
                 perror("Something went wrong while receiving...\n");
             }
             else {
                 printf("Received %d Bytes: ", bytes_read);
-                puts(inBuffer);
-                //write(stdout, inBuffer, bytes_read);
-                //fflush(stdout);
-                //puts("");
+                fflush(stdout);
+                write(STDOUT_FILENO , inBuffer, bytes_read);
+                puts("");
             }
         }
         memset(outBuffer, 0, OUT_BUFFER_SIZE);
