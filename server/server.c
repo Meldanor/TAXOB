@@ -56,6 +56,7 @@ int main(int argc, char **args) {
         cur = args[i];
         // READ PORT
         if (strcmp(cur, "-p") == 0) {
+            // Todo: Ohne regex
             // Check if the user has written a number
             if (!isNumber(args[++i])) {
                 printf("Port '%s' is an invalid number!\n", args[i]);
@@ -108,7 +109,7 @@ int createConnection(int port) {
     // LISTEN TO PORT
     server_addr.sin_port = htons( port );
     // BIND THE SOCKET TO THE PARAMETER
-    int result = bind(serverSocket, (struct sockaddr*)(&server_addr), sizeof(struct sockaddr));
+    int result = bind(serverSocket, (struct sockaddr*)(&server_addr), sizeof(struct sockaddr_in));
     if (result < 0 ) {
         perror("Unable to bind server to socket!\n");
         return EXIT_FAILURE;
@@ -164,6 +165,7 @@ void handleClient(int clientSocket, struct sockaddr_in *client) {
     
         if (bytes_read == -1) {
             perror("Something went wrong while receiving...\n");
+            break;
         }  
         else {
             printf("Received %d Bytes: ", bytes_read);

@@ -104,9 +104,9 @@ int createConnection(char *address, int port) {
     // ADDRESS CAN BE A IP ADDRESS OR A DOMAIN NAME
     if (getAddress(address, &serv_addr) == EXIT_FAILURE)
         return EXIT_FAILURE;
-    
+
     // TRY TO CONNECT VIA THE SOCKET TO THE ADDRESS
-    if (connect(clientSocket, (struct sockaddr*)(&serv_addr), sizeof(struct sockaddr)) == -1) {
+    if (connect(clientSocket, (struct sockaddr*)(&serv_addr), sizeof(struct sockaddr_in)) == -1) {
         perror ("Unable to connect to the server!\n");
         return EXIT_FAILURE;
     }
@@ -129,10 +129,12 @@ void clientLoop(void) {
     int bytes_send;
 
     // WAIT FOR CONSOLE INPUT
-    while(fgets(outBuffer, sizeof(outBuffer), stdin))  {
-        int len = strnlen(outBuffer, sizeof(outBuffer));
-        if(outBuffer[len-1] == '\n')
+
+    int inputLen = 0;
+    while ((inputLen = read(stdin, outBuffer, sizeof(outBuffer))) {
+        if (inputLen > 0 && outBuffer[inputLen - 1] == '\n')
             outBuffer[len-1] = '\0';
+
         bytes_send = write(clientSocket, outBuffer, len -1);
         if (bytes_send == -1 ) {
             perror("Something went wrong while receiving...\n");
@@ -142,7 +144,6 @@ void clientLoop(void) {
             puts(outBuffer);            
             //write(stdout, outBuffer, bytes_send);
             //fflush(stdout);
-            memcpy(inBuffer, outBuffer, bytes_send);
             bytes_read = read(clientSocket, inBuffer, bytes_send);
             if (bytes_read == -1) {
                 perror("Something went wrong while receiving...\n");
